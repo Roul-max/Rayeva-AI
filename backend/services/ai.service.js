@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import AiLog from "../models/AiLog.js";
+import AiLog from "../models/Ailog.js";
 
 /*
   Lazy initialization for Gemini.
