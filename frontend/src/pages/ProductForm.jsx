@@ -1,16 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { createProduct, getProducts } from "../services/api.js";
 import {
   CheckCircle2,
   AlertCircle,
-  Filter,
-  PackageSearch,
-  Search,
-  X,
   Sparkles,
   Leaf,
   Settings2,
-  Eye,
+  TrendingUp,
 } from "lucide-react";
 import {
   Card,
@@ -19,7 +15,6 @@ import {
   Textarea,
   Badge,
   Modal,
-  SelectWithSearch,
 } from "../components/ui.jsx";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -102,6 +97,18 @@ export default function ProductForm() {
   }, [categoryFilter, sustainabilityFilter, searchQuery]);
 
   /* -------------------------
+     Average Eco Score (NEW)
+  ------------------------- */
+  const averageEcoScore = useMemo(() => {
+    if (!products.length) return 0;
+    const total = products.reduce(
+      (sum, p) => sum + (p.eco_score || 0),
+      0
+    );
+    return Math.round(total / products.length);
+  }, [products]);
+
+  /* -------------------------
      Submit
   ------------------------- */
   const handleSubmit = async (e) => {
@@ -135,15 +142,6 @@ export default function ProductForm() {
     }
   };
 
-  const clearFilters = () => {
-    setCategoryFilter("");
-    setSustainabilityFilter("");
-    setSearchQuery("");
-  };
-
-  const hasActiveFilters =
-    categoryFilter || sustainabilityFilter || searchQuery;
-
   return (
     <div className="space-y-12">
       {/* HEADER */}
@@ -173,62 +171,6 @@ export default function ProductForm() {
             AI Settings
           </button>
         </div>
-
-        <AnimatePresence>
-          {showSettings && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden mb-8"
-            >
-              <div className="p-5 bg-slate-100 dark:bg-slate-900 rounded-2xl border space-y-4">
-                <div>
-                  <label className="text-xs font-bold uppercase">
-                    AI Model
-                  </label>
-                  <select
-                    value={formData.model}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        model: e.target.value,
-                      })
-                    }
-                    className="w-full mt-2 border rounded-xl px-4 py-2"
-                  >
-                    <option value="gemini-3-flash-preview">
-                      Gemini 3 Flash
-                    </option>
-                    <option value="gemini-3.1-pro-preview">
-                      Gemini 3.1 Pro
-                    </option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold uppercase">
-                    Temperature: {formData.temperature}
-                  </label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    value={formData.temperature}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        temperature: parseFloat(e.target.value),
-                      })
-                    }
-                    className="w-full mt-2"
-                  />
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         <form onSubmit={handleSubmit} className="space-y-8">
           <Input
@@ -311,9 +253,28 @@ export default function ProductForm() {
               <span className="text-xs font-bold uppercase">
                 Eco Score
               </span>
-              <p className="text-2xl font-bold text-emerald-600">
-                {result?.eco_score}/100
-              </p>
+
+              {/* High Impact Badge (NEW) */}
+              <div className="flex items-center gap-2 mt-1">
+                {result?.eco_score > 85 && (
+                  <Badge variant="success">
+                    High Impact
+                  </Badge>
+                )}
+                <p className="text-2xl font-bold text-emerald-600">
+                  {result?.eco_score}/100
+                </p>
+              </div>
+
+              {/* Animated Progress Bar (NEW) */}
+              <div className="w-full bg-slate-200 dark:bg-slate-800 h-3 rounded-full overflow-hidden mt-3">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${result?.eco_score || 0}%` }}
+                  transition={{ duration: 1.2 }}
+                  className="h-full bg-gradient-to-r from-emerald-400 to-teal-500"
+                />
+              </div>
             </div>
           </div>
 
@@ -344,7 +305,24 @@ export default function ProductForm() {
         </Card>
       )}
 
-      {/* Modal unchanged */}
+      {/* Average Eco Score Dashboard (NEW) */}
+      {products.length > 0 && (
+        <Card>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-bold uppercase text-slate-500">
+                Average Eco Score
+              </p>
+              <p className="text-4xl font-black text-emerald-600">
+                {averageEcoScore}/100
+              </p>
+            </div>
+            <TrendingUp className="w-10 h-10 text-emerald-500" />
+          </div>
+        </Card>
+      )}
+
+      {/* Modal */}
       <Modal
         isOpen={!!selectedProduct}
         onClose={() => setSelectedProduct(null)}
