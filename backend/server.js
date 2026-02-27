@@ -1,5 +1,5 @@
 import dns from "node:dns";
-dns.setServers(["1.1.1.1"]); // Force Cloudflare DNS (helps avoid some DNS issues)
+dns.setServers(["1.1.1.1"]); // Force Cloudflare DNS
 
 import express from "express";
 import cors from "cors";
@@ -16,10 +16,10 @@ import { errorHandler } from "./middleware/error.middleware.js";
 dotenv.config();
 
 /* -----------------------------
-   Check required ENV variables
+   Validate required ENV variables
 ------------------------------ */
 if (!process.env.MONGO_URI) {
-  console.error("MONGO_URI is missing in .env file");
+  console.error("MONGO_URI is missing in environment variables");
   process.exit(1);
 }
 
@@ -35,17 +35,31 @@ if (!process.env.GEMINI_API_KEY) {
 connectDB();
 
 /* -----------------------------
-   Initialize Express app
+   Initialize Express
 ------------------------------ */
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 /* -----------------------------
-   CORS setup
+   CORS Configuration
 ------------------------------ */
+const allowedOrigins = [
+  "http://localhost:5173",          // Local dev
+  process.env.CLIENT_URL            // Production frontend (Vercel)
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: function (origin, callback) {
+      // Allow requests with no origin (Postman, server-to-server)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
@@ -57,7 +71,6 @@ app.use(express.json());
 
 /* -----------------------------
    Health check route
-   (Used by Render or similar services)
 ------------------------------ */
 app.get("/", (req, res) => {
   res.status(200).json({
@@ -67,24 +80,24 @@ app.get("/", (req, res) => {
 });
 
 /* -----------------------------
-   API routes
+   API Routes
 ------------------------------ */
 app.use("/api/products", productRoutes);
 app.use("/api/impact", impactRoutes);
 
 /* -----------------------------
-   Global error handler
+   Global Error Handler
 ------------------------------ */
 app.use(errorHandler);
 
 /* -----------------------------
-   Start server
+   Start Server
 ------------------------------ */
 app.listen(PORT, () => {
   console.log("=====================================");
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
   console.log(
-    `Environment: ${process.env.NODE_ENV || "development"}`
+    `🌍 Environment: ${process.env.NODE_ENV || "development"}`
   );
   console.log("=====================================");
 });
