@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en" class="">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="ai.svg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Rayeva AI – Generate sustainable product categories, SEO tags, eco scores, and impact reports powered by Gemini AI." />
+    <meta name="theme-color" content="#f8fafc" />
+
+    <title>Rayeva AI</title>
+
+    <!-- Dark Mode Early Init (Prevents Flash) -->
+    <script>
+      try {
+        const storedTheme = localStorage.getItem('theme');
+        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        if (storedTheme === 'dark' || (!storedTheme && systemDark)) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      } catch (e) {
+        console.warn('Theme initialization failed:', e);
+      }
+    </script>
+  </head>
+
+  <body class="antialiased bg-slate-50 dark:bg-slate-950 transition-colors duration-500">
+    <div id="root"></div>
+
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

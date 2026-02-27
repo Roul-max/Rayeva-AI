@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+/* 🔥 Enable class-based dark mode in Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Theme Extension */
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Base Body Styling */
+body {
+  @apply bg-slate-50 text-black antialiased transition-colors duration-500;
+}
+
+/* Dark Mode */
+.dark body {
+  @apply bg-slate-950 text-white;
+}
+
+/* Background Mesh Layer */
+.bg-mesh {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-color: #f8fafc;
+  transition: background-color 0.5s ease;
+}
+
+/* Dark Mode Mesh */
+.dark .bg-mesh {
+  background-color: #020617;
+  background-image:
+    radial-gradient(at 0% 0%, hsla(153, 100%, 10%, 0.5) 0, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(175, 100%, 10%, 0.5) 0, transparent 50%);
+}
